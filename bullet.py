@@ -18,12 +18,12 @@ class Bullet(Sprite):
 
 
         #create a bullet at (0, 0) and then set correct position
-        self.bullet_rect = pygame.Rect(0, 0, self.settings.bullet_width,
+        self.rect = pygame.Rect(0, 0, self.settings.bullet_width,
                                        self.settings.bullet_height)
-        self.bullet_rect.midtop = self.ship.rect.midtop
+        self.rect.midtop = self.ship.rect.midtop
 
         #Stpre the bullet position as a float
-        self.y = float(self.bullet_rect.y)
+        self.y = float(self.rect.y)
     
 
     def update(self):
@@ -31,9 +31,9 @@ class Bullet(Sprite):
         #Update the exact position of the bullet
         self.y -= self.settings.bullet_speed
         #update the Bullet_rect position
-        self.bullet_rect.y = self.y
+        self.rect.y = self.y
 
     
     def draw_bullet(self):
         """Draw the bullet to the screen"""
-        pygame.draw.rect(self.screen, self.color, self.bullet_rect)
+        pygame.draw.rect(self.screen, self.color, self.rect)
