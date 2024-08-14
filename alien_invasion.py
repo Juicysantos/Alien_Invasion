@@ -6,6 +6,7 @@ import pygame
 
 from settings import Settings
 from game_stats import GameStats
+from scoreboard import ScoreBoard
 from button import Button
 from ship import Ship
 from bullet import Bullet
@@ -31,7 +32,10 @@ class AlienInvasion:
         pygame.display.set_caption("Alien Invasion")
 
         #Create an instance to store game statistics
+        # and create a scoreboard
         self.stats = GameStats(self)
+        self.sb = ScoreBoard(self)
+
 
 
         self.ship = Ship(self)
@@ -89,8 +93,13 @@ class AlienInvasion:
         """Start a new game when the player clicks Play"""
         button_clicked = self.play_button.rect.collidepoint(mouse_pos)
         if button_clicked and not self.game_active:
+            #Reset the game settings:
+            self.settings.initialize_dynamic_settings()
             #Reset the game statistics
             self.stats.reset_stats()
+            self.sb.prep_score()
+            self.sb.prep_level()
+            self.sb.prep_ships()
             self.game_active = True
 
             #get rid of any remaining bullets and aliens.
@@ -159,10 +168,22 @@ class AlienInvasion:
             self.bullets, self.aliens, True, True
         )
 
+        if collisions:
+            for aliens in collisions.values():
+                self.stats.score += self.settings.alien_points * len(aliens)
+            self.sb.prep_score()
+            self.sb.check_high_score()
+
+
         if not self.aliens:
             #Destroy existing bullets and creat new fleet
             self.bullets.empty()
             self._create_fleet()
+            self.settings.increase_speed()
+
+            #Increase level
+            self.stats.level += 1
+            self.sb.prep_level()
 
     
     
@@ -194,6 +215,7 @@ class AlienInvasion:
         #decrement ships_left
         if self.stats.ships_left > 0:
             self.stats.ships_left -= 1
+            self.sb.prep_ships()
 
             #get rid of any remaining bullets and aliens
             self.bullets.empty()
@@ -267,6 +289,9 @@ class AlienInvasion:
          self.ship.blitme()
          self.aliens.draw(self.screen) #to make aliens appear on the screen
         
+         #Draw the score information
+         self.sb.show_score()
+
          #Draw the play button if the game is inactive
          if not self.game_active:
              self.play_button.draw_button()
